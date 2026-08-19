@@ -7,6 +7,9 @@
   let price = $state(5);
   let quantity = $state(10);
   let total = $derived(price * quantity);
+  $inspect(items).with((type, value) => {
+    console.log("items updated to: ", value);
+  });
   function increment() {
     count += 1;
   }
@@ -16,6 +19,7 @@
   }
   function increasePrice() {
     price += 5;
+    console.log("New price", $state.snapshot(price));
   }
 </script>
 
