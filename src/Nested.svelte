@@ -1,7 +1,9 @@
 <script>
-  let age = 26;
-  let gender = "male";
+  import { auth } from "./Auth.svelte";
 </script>
 
-<h2>Age: {age}</h2>
-<h2>Gender: {gender}</h2>
+<div>
+  <h4>Nested Component (Sidebar / Header view)</h4>
+  <p>Active User: {auth.user}</p>
+  <p>Active Role: {auth.role}</p>
+</div>
