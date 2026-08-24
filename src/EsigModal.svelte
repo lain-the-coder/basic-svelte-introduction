@@ -16,8 +16,7 @@
     <input
       type="text"
       placeholder="e.g., Verified in staging"
-      value={comment}
-      oninput={(e) => (comment = e.target.value)}
+      bind:value={comment}
     />
   </label>
 

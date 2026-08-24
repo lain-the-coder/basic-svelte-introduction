@@ -12,11 +12,31 @@
   let total = $derived(price * quantity);
   let secondsActive = $state(0);
   let newTitle = $state("");
+  let newDescription = $state("");
+  let newCategory = $state(null); // Explicit null for unset placeholder
 
   let changeRequests = $state([
-    { id: 101, title: "Database Migration", status: "Approved" },
-    { id: 102, title: "Token Auth Refactor", status: "Pending" },
-    { id: 103, title: "Add SSL Middleware", status: "Initiated" },
+    {
+      id: 101,
+      title: "Database Migration",
+      description: "Upgrade PostgreSQL schema for audit logging",
+      category: "Infrastructure",
+      status: "Approved",
+    },
+    {
+      id: 102,
+      title: "Token Auth Refactor",
+      description: "Migrate to JWT validation middleware",
+      category: "Security",
+      status: "Pending",
+    },
+    {
+      id: 103,
+      title: "Add SSL Middleware",
+      description: "Enforce TLS 1.3 across all endpoints",
+      category: "Security",
+      status: "Initiated",
+    },
   ]);
 
   // State to capture plain data sent upward by the child
@@ -108,15 +128,18 @@
     // 2. Validate input is not empty
     if (!newTitle.trim()) return;
 
-    // 3. Add to reactive state array
     changeRequests.push({
       id: Date.now(),
       title: newTitle,
+      description: newDescription,
+      category: newCategory || "Uncategorized",
       status: "Initiated",
     });
 
-    // 4. Clear the text input field
+    // Reset fields
     newTitle = "";
+    newDescription = "";
+    newCategory = null;
   }
 </script>
 
@@ -148,15 +171,39 @@
 <hr />
 
 <form onsubmit={handlerSubmit}>
+  <h4>Create Change Request</h4>
+
   <label>
-    <strong>Create Change Request: </strong>
+    <strong>Title: </strong>
     <input
       type="text"
       placeholder="Enter request title..."
-      value={newTitle}
-      oninput={(e) => (newTitle = e.target.value)}
+      bind:value={newTitle}
     />
   </label>
+  <br />
+
+  <label>
+    <strong>Category: </strong>
+    <select bind:value={newCategory}>
+      <option value={null}>Select a category…</option>
+      <option value="Security">Security</option>
+      <option value="Infrastructure">Infrastructure</option>
+      <option value="Quality Assurance">Quality Assurance</option>
+    </select>
+  </label>
+  <br />
+
+  <label>
+    <strong>Description: </strong>
+    <textarea
+      rows="2"
+      placeholder="Explain reason for change..."
+      bind:value={newDescription}
+    ></textarea>
+  </label>
+  <br />
+
   <button type="submit">Submit Request</button>
 </form>
 
@@ -206,12 +253,17 @@
 
 {#if selectedRecord}
   <div>
-    <h4>Currently Inspecting Record:</h4>
-    <p>ID: {selectedRecord.id}</p>
-    <p>Title: {selectedRecord.title}</p>
-    <p>Status: {selectedRecord.status}</p>
+    <h4>Inspecting Record: CR-{selectedRecord.id}</h4>
 
-    <!-- Inline arrow handler to reset state -->
+    {#if selectedRecord.status === "Approved"}
+      <!-- Read-only branch: Plain value, disabled, no bind: -->
+      <label>Title: <input value={selectedRecord.title} disabled /></label>
+    {:else}
+      <!-- Editable branch: 2-way bind into the selected object -->
+      <label>Title: <input bind:value={selectedRecord.title} /></label>
+    {/if}
+
+    <br />
     <button onclick={() => (selectedRecord = null)}>Close Details</button>
   </div>
 {/if}
