@@ -226,7 +226,7 @@
 
 <ul>
   {#each changeRequests as cr (cr.id)}
-    <li>
+    <li class={["row-item", { "active-row": selectedRecord?.id === cr.id }]}>
       {#if cr.status === "Approved"}
         <span>[FINALIZED]</span>
       {:else if cr.status === "Pending"}
@@ -288,3 +288,10 @@
 <p>Total: {total}</p>
 
 <hr />
+
+<style>
+  .active-row {
+    font-weight: bold;
+    text-decoration: underline;
+  }
+</style>
