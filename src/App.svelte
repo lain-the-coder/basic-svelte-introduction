@@ -11,6 +11,12 @@
   let total = $derived(price * quantity);
   let secondsActive = $state(0);
 
+  let changeRequests = $state([
+    { id: 101, title: "Database Migration", status: "Approved" },
+    { id: 102, title: "Token Auth Refactor", status: "Pending" },
+    { id: 103, title: "Add SSL Middleware", status: "Initiated" },
+  ]);
+
   // State to capture plain data sent upward by the child
   let messageFromChild = $state("No message yet");
 
@@ -48,11 +54,38 @@
   function handleChildNotification(rawMessage) {
     messageFromChild = rawMessage;
   }
+
+  function removeFirstRecord() {
+    changeRequests.shift();
+  }
+
+  function addRecord() {
+    const newId = Date.now();
+    changeRequests.push({
+      id: newId,
+      title: `Patch Fix #${changeRequests.length + 1}`,
+      status: "Initiated",
+    });
+  }
 </script>
 
 <h1>Welcome, {name.toUpperCase()}</h1>
 
-<!-- Child 1: Overrides defaults, passes live 'price' state, and binds parent callback -->
+{#if auth.isLoggedIn}
+  <div>
+    <p>Signed in as: <strong>{auth.user}</strong> (Role: {auth.role})</p>
+    <button onclick={LogOut}>Log Out</button>
+  </div>
+{:else}
+  <div>
+    <p>You are currently browsing as a Guest.</p>
+    <button onclick={LogIn}>Log In as Admin</button>
+  </div>
+{/if}
+
+<hr />
+
+<!-- Child: Overrides defaults, passes live 'price' state, and binds parent callback -->
 <Nested
   title="Live Inventory Unit"
   category="Electronics"
@@ -60,23 +93,38 @@
   onNotify={handleChildNotification}
 />
 
-<!-- Child 2: Relies on default category="General" -->
-<Nested
-  title="Backup Inventory Unit"
-  currentPrice={price}
-  onNotify={handleChildNotification}
-/>
-
 <p>Parent received from child: <strong>{messageFromChild}</strong></p>
 
-<!-- Auth Module Controls -->
-<div>
-  <h3>Auth Module (Universal Reactivity)</h3>
-  <p>Current User: {auth.user}</p>
-  <p>Access Token: {auth.accessToken}</p>
-  <button onclick={LogIn}>Log In as Admin</button>
-  <button onclick={LogOut}>Log Out</button>
-</div>
+<hr />
+
+<h3>Change Requests Table (Keyed Loop)</h3>
+
+<button onclick={addRecord}>+ Add Request</button>
+<button onclick={removeFirstRecord}>Remove Top Request</button>
+
+<ul>
+  {#each changeRequests as cr (cr.id)}
+    <li>
+      <!-- Multi-branch status tag -->
+      {#if cr.status === "Approved"}
+        <span>[FINALIZED]</span>
+      {:else if cr.status === "Pending"}
+        <span>[AWAITING REVIEW]</span>
+      {:else}
+        <span>[DRAFT]</span>
+      {/if}
+
+      <strong>{cr.title}</strong> (ID: {cr.id}) -
+
+      <input placeholder="Type note for this row..." />
+    </li>
+  {:else}
+    <!-- Fallback when array is empty -->
+    <li>No change requests currently in the queue.</li>
+  {/each}
+</ul>
+
+<hr />
 
 <p>{@html string}</p>
 <p>Active Session: {secondsActive}</p>
@@ -94,3 +142,5 @@
 <p>Price: {price}</p>
 <p>Quantity: {quantity}</p>
 <p>Total: {total}</p>
+
+<hr />

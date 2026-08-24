@@ -10,6 +10,10 @@
 <div>
   <h4>Nested Component (Sidebar / Header view)</h4>
 
+  {#if auth.role === "Admin"}
+    <p><strong>[ADMIN PRIVILEGES ACTIVE]</strong></p>
+  {/if}
+
   <!-- Reading Global State -->
   <p>Active User: {auth.user}</p>
 
